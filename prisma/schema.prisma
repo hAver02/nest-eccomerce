@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url = env("DATABASE_URL")
+}
+
+model Category {
+  id Int @id @default(autoincrement())
+  name String
+  subcategories SubCategory[]
+}
+model SubCategory{
+  id Int @id @default(autoincrement())
+  name String
+  categoryId Int
+  category Category @relation(fields: [categoryId], references: [id])
+  products Product[]
+}
+
+model Product {
+  id             Int             @id @default(autoincrement())
+  name           String 
+  description    String?
+  price          Float
+  image          String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  budgetProducts BudgetProduct[]
+  subcategoryId  Int
+  subcategory    SubCategory      @relation(fields: [subcategoryId], references: [id]) // Relación con subcategoría
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  first_name String
+  last_name String
+  email String @unique
+  password String
+  role Role @default(CLIENTE)
+  budgets   Budget[] 
+}
+
+enum Role {
+  ADMIN
+  CLIENTE
+}
+
+
+model Budget {
+  id             Int             @id @default(autoincrement())
+  userId         Int
+  user           User             @relation(fields: [userId], references: [id])
+  totalAmount    Float
+  budgetProducts BudgetProduct[] 
+  createdAt      DateTime         @default(now())
+}
+
+model BudgetProduct {
+  id        Int      @id @default(autoincrement())
+  budgetId  Int
+  budget    Budget   @relation(fields: [budgetId], references: [id])
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float   
+}
